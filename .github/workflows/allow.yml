@@ -1,0 +1,32 @@
+name: Allow
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  runner-alive:
+    name: Runner starts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show the runner
+        run: |
+          echo "GitHub Actions runner started"
+          echo "event=${{ github.event_name }} ref=${{ github.ref }}"
+
+  cbom-clean:
+    name: Clean tree is allowed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out DevSecShield
+        uses: actions/checkout@v4
+        with:
+          repository: AnshSinghal-CyberUltron/DevSecShield
+          ref: ansh
+          token: ${{ secrets.DEVSECSHIELD_READ }}
+          path: DevSecShield
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Scan the clean tree
+        working-directory: DevSecShield/aibom
+        run: uv run aibom cbom tests/fixtures/code-supply/clean

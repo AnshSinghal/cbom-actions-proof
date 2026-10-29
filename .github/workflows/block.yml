@@ -1,0 +1,23 @@
+name: Block
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  cbom-vulnerable:
+    name: Vulnerable tree is blocked
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out DevSecShield
+        uses: actions/checkout@v4
+        with:
+          repository: AnshSinghal-CyberUltron/DevSecShield
+          ref: ansh
+          token: ${{ secrets.DEVSECSHIELD_READ }}
+          path: DevSecShield
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Scan the vulnerable tree
+        working-directory: DevSecShield/aibom
+        run: uv run aibom cbom tests/fixtures/code-supply/vulnerable
