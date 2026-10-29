@@ -1,0 +1,22 @@
+name: CBOM product CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  cbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan the sample with the staging CBOM API
+        run: |
+          zip -r project.zip sample
+          RESPONSE=$(curl -sS -X POST \
+            -H "cicd-api-key: ${{ secrets.CICD_API_KEY }}" \
+            -F "zip_file=@project.zip" \
+            http://devsec-staging-api.zeroshield.ai/cicd/cbom/scan)
+          echo "$RESPONSE" | jq '{status, cicd_log_id, finding_count}'
+          COUNT=$(echo "$RESPONSE" | jq '.finding_count // 0')
+          echo "CBOM findings: $COUNT"
+          test "$COUNT" -gt 0
